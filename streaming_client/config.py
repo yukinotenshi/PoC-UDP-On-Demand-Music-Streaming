@@ -1,0 +1,2 @@
+BUFFER_SIZE = 2048
+CODEC = "utf-8"
