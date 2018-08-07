@@ -1,4 +1,5 @@
 from typing import Tuple
+from time import sleep
 
 from streaming_server import config
 from streaming_server.handler.base_request_handler import RequestHandler
@@ -13,6 +14,7 @@ class StopHandler(RequestHandler):
             if t['client'] == self.client_address:
                 t['instance'].stop = True
                 t['instance'].paused = False
+                config.LONG_RUN_THREADS.pop(config.LONG_RUN_THREADS.index(t))
                 break
 
         return None

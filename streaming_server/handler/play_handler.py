@@ -25,10 +25,9 @@ class PlayHandler(RequestHandler):
 
         while data != '' and not self.stop:
             self.socket.sendto(data, self.client_address)
-            data = wf.readframes(chunk)
             self.paused = True
             while self.paused:
                 sleep(0.1)
+            data = wf.readframes(chunk)
 
         wf.close()
-        config.LONG_RUN_THREADS.remove(self.dict())

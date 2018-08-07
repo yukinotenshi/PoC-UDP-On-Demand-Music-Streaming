@@ -23,6 +23,6 @@ class Router:
 
         if handler_instance.can_stop:
             config.LONG_RUN_THREADS.append({
-                "client" : self.client_address,
-                "instance" : handler_instance
+                "client": self.client_address,
+                "instance": handler_instance
             })

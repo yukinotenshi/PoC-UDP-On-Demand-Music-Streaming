@@ -1,8 +1,8 @@
 import socket
 import threading
 from typing import Tuple
-from streaming_server.router import Router
 
+from streaming_server.router import Router
 from streaming_server import config
 
 

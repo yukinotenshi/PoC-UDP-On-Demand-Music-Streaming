@@ -27,8 +27,9 @@ class AudioPlayer(Thread):
     def request_next_chunk(self):
         if not self.next_available:
             return
-        sock.send(b"continue")
-        data = sock.recv(config.BUFFER_SIZE)
+
+        self.socket.send(b"continue")
+        data = self.socket.recv(config.BUFFER_SIZE)
 
         if len(data) < config.BUFFER_SIZE:
             self.next_available = False
@@ -37,39 +38,30 @@ class AudioPlayer(Thread):
         self.current_pos += 1
 
     def initialize(self):
-        sock.send(f"info {self.song}".encode(config.CODEC))
-        response = sock.recv(2048).decode('utf-8')
-        print(response)
+        self.socket.send(f"info {self.song}".encode(config.CODEC))
+        response = self.socket.recv(2048).decode(config.CODEC)
         channel_count, rate, sample_width = response.split(',')
 
-        self.stream = self.audio.open(format=
-                        self.audio.get_format_from_width(int(sample_width)),
+        self.stream = self.audio.open(format=self.audio.get_format_from_width(int(sample_width)),
                         channels=int(channel_count),
                         rate=int(rate),
                         output=True)
 
-        sock.send(f"play {self.song}".encode(config.CODEC))
-        self.data.append(sock.recv(config.BUFFER_SIZE))
-        print(self.data)
+        self.socket.send(f"play {self.song}".encode(config.CODEC))
+        self.data.append(self.socket.recv(config.BUFFER_SIZE))
         self.current_pos = 0
 
     def stop(self):
-        self.paused = True
-        sock.send(b"stop")
+        self.socket.send(b"stop")
 
     def run(self):
         self.initialize()
+        self.paused = False
 
         while self.next_available:
-            self.stream.write(self.data[self.current_pos])
             self.request_next_chunk()
+            self.stream.write(self.data[self.current_pos])
             while self.paused:
                 sleep(0.1)
 
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.connect(("0.0.0.0", 5555))
-
-player = AudioPlayer(sock)
-player.load_song("test")
-player.start()
+        self.stop()
